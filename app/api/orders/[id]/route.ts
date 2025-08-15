@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify authentication
@@ -16,7 +16,8 @@ export async function GET(
 
     await dbConnect();
 
-    const order = await Order.findById(params.id);
+    const { id } = await params;
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
@@ -40,7 +41,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify authentication
@@ -51,9 +52,10 @@ export async function PATCH(
 
     await dbConnect();
 
+    const { id } = await params;
     const updateData = await request.json();
 
-    const order = await Order.findByIdAndUpdate(params.id, updateData, {
+    const order = await Order.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
@@ -81,7 +83,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify authentication
@@ -92,7 +94,8 @@ export async function DELETE(
 
     await dbConnect();
 
-    const order = await Order.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const order = await Order.findByIdAndDelete(id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });

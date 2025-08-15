@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
 
     // Build query
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (status && status !== 'all') {
       query.status = status;
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate total amount
-    const totalAmount = orderData.items.reduce((sum: number, item: any) => {
+    const totalAmount = orderData.items.reduce((sum: number, item: { price: number; quantity: number }) => {
       return sum + item.price * item.quantity;
     }, 0);
 

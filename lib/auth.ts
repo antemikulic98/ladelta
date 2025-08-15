@@ -47,7 +47,7 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
       'email' in payload &&
       'role' in payload
     ) {
-      return payload as TokenPayload;
+      return payload as unknown as TokenPayload;
     }
     
     console.error('Invalid token payload structure');
@@ -68,7 +68,7 @@ export async function getTokenFromRequest(
   }
 
   // Try to get token from cookies
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const tokenCookie = cookieStore.get('auth-token');
 
   return tokenCookie?.value || null;

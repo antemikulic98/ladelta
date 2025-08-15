@@ -1,19 +1,18 @@
 'use client';
 
-import { Perf } from 'r3f-perf';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function PerformanceMonitor() {
-  const [showPerf, setShowPerf] = useState(false);
-
   useEffect(() => {
     // Only show performance monitor in development
     if (process.env.NODE_ENV === 'development') {
-      setShowPerf(true);
+      console.log(
+        '🎯 Performance Monitor: r3f-perf temporarily disabled for deployment compatibility'
+      );
     }
   }, []);
 
-  if (!showPerf) return null;
-
-  return <Perf position='top-left' />;
+  // Performance monitoring temporarily disabled for deployment compatibility
+  // TODO: Re-enable when r3f-perf supports React 19 and @react-three/fiber 9.3+
+  return null;
 }

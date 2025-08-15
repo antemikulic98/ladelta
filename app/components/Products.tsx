@@ -96,7 +96,7 @@ export default function ProductsSection() {
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
-            {products.map((product, index) => (
+            {products.map((product) => (
               <article
                 key={product.name}
                 className={`group relative cursor-pointer ${

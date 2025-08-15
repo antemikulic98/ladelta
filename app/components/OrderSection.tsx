@@ -260,8 +260,8 @@ export default function OrderSection() {
               </button>
 
               <p className='text-xs text-warmGray text-center'>
-                Klikom na "Pošaljite upit" slažete se da vas kontaktiramo u vezi
-                vaše narudžbe.
+                Klikom na &quot;Pošaljite upit&quot; slažete se da vas
+                kontaktiramo u vezi vaše narudžbe.
                 <br />
                 <em>
                   Napomena: Forma je trenutno informativna - kontaktirajte nas

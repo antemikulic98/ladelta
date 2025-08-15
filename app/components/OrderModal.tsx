@@ -381,7 +381,7 @@ export default function OrderModal({
                     Naše popularne torte
                   </h3>
                   <div className='grid md:grid-cols-3 gap-6'>
-                    {products.map((product, index) => (
+                    {products.map((product) => (
                       <div
                         key={product.name}
                         className='group relative h-full cursor-pointer'
@@ -527,9 +527,11 @@ export default function OrderModal({
                     return (
                       <div className='w-16 h-16 rounded-xl overflow-hidden flex-shrink-0'>
                         {formData.customCakePreview ? (
-                          <img
+                          <Image
                             src={formData.customCakePreview}
                             alt='Prilagođena torta'
+                            width={64}
+                            height={64}
                             className='w-full h-full object-cover'
                           />
                         ) : selectedProduct ? (
@@ -860,9 +862,11 @@ export default function OrderModal({
                       return (
                         <div className='w-16 h-16 rounded-xl overflow-hidden flex-shrink-0'>
                           {formData.customCakePreview ? (
-                            <img
+                            <Image
                               src={formData.customCakePreview}
                               alt='Prilagođena torta'
+                              width={64}
+                              height={64}
                               className='w-full h-full object-cover'
                             />
                           ) : selectedProduct ? (
@@ -1038,9 +1042,9 @@ export default function OrderModal({
                 </div>
 
                 <p className='text-sm text-gray-700 font-medium text-center bg-gray-50 p-3 rounded-lg border border-gray-200'>
-                  Klikom na "Potvrdi narudžbu" slažete se da vas kontaktiramo u
-                  vezi narudžbe. Narudžba nije konačna dok ne potvrdimo
-                  dostupnost.
+                  Klikom na &quot;Potvrdi narudžbu&quot; slažete se da vas
+                  kontaktiramo u vezi narudžbe. Narudžba nije konačna dok ne
+                  potvrdimo dostupnost.
                 </p>
               </div>
             )}

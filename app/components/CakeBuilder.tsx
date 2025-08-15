@@ -196,7 +196,10 @@ export default function CakeBuilder() {
                   <button
                     key={size}
                     onClick={() =>
-                      setCakeOptions((prev) => ({ ...prev, size: size as any }))
+                      setCakeOptions((prev) => ({
+                        ...prev,
+                        size: size as CakeOptions['size'],
+                      }))
                     }
                     className={`p-4 rounded-xl border-2 transition-all duration-300 text-center ${
                       cakeOptions.size === size
@@ -239,7 +242,7 @@ export default function CakeBuilder() {
                     onClick={() =>
                       setCakeOptions((prev) => ({
                         ...prev,
-                        insideFlavor: flavor.key as any,
+                        insideFlavor: flavor.key as CakeOptions['insideFlavor'],
                       }))
                     }
                     className={`p-3 rounded-xl border-2 transition-all duration-300 flex items-center gap-2 ${
@@ -304,7 +307,8 @@ export default function CakeBuilder() {
                     onClick={() =>
                       setCakeOptions((prev) => ({
                         ...prev,
-                        outsideCovering: covering.key as any,
+                        outsideCovering:
+                          covering.key as CakeOptions['outsideCovering'],
                       }))
                     }
                     className={`w-full p-4 rounded-xl border-2 transition-all duration-300 text-left flex items-center gap-3 ${
@@ -343,7 +347,7 @@ export default function CakeBuilder() {
                     onClick={() =>
                       setCakeOptions((prev) => ({
                         ...prev,
-                        layers: layers as any,
+                        layers: layers as CakeOptions['layers'],
                       }))
                     }
                     className={`w-16 h-16 rounded-xl border-2 transition-all duration-300 flex items-center justify-center font-bold text-lg ${
@@ -414,7 +418,7 @@ export default function CakeBuilder() {
                     onClick={() =>
                       setCakeOptions((prev) => ({
                         ...prev,
-                        decoration: decoration.key as any,
+                        decoration: decoration.key as CakeOptions['decoration'],
                       }))
                     }
                     className={`w-full p-4 rounded-xl border-2 transition-all duration-300 text-left flex items-center gap-3 ${

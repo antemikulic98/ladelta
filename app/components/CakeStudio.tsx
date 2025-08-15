@@ -1,9 +1,8 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
-import { EffectComposer, Bloom, SSAO, N8AO } from '@react-three/postprocessing';
-import * as THREE from 'three';
+import { OrbitControls, ContactShadows } from '@react-three/drei';
+import { EffectComposer, Bloom, N8AO } from '@react-three/postprocessing';
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
@@ -453,7 +452,10 @@ export default function CakeStudio() {
                   <CustomSelect
                     value={options.flavor}
                     onChange={(value) =>
-                      setOptions((prev) => ({ ...prev, flavor: value as any }))
+                      setOptions((prev) => ({
+                        ...prev,
+                        flavor: value as CakeOptions['flavor'],
+                      }))
                     }
                     options={[
                       { value: 'chocolate', label: 'Čokolada' },
@@ -475,7 +477,7 @@ export default function CakeStudio() {
                     onChange={(value) =>
                       setOptions((prev) => ({
                         ...prev,
-                        covering: value as any,
+                        covering: value as CakeOptions['covering'],
                       }))
                     }
                     options={[
@@ -497,7 +499,7 @@ export default function CakeStudio() {
                     onChange={(value) =>
                       setOptions((prev) => ({
                         ...prev,
-                        decoration: value as any,
+                        decoration: value as CakeOptions['decoration'],
                       }))
                     }
                     options={[

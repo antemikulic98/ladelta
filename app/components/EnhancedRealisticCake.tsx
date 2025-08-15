@@ -1,12 +1,7 @@
 'use client';
 
-import { Canvas, useFrame } from '@react-three/fiber';
-import {
-  OrbitControls,
-  Float,
-  Sparkles,
-  PerspectiveCamera,
-} from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Sparkles, PerspectiveCamera } from '@react-three/drei';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import PerformanceMonitor from './PerformanceMonitor';

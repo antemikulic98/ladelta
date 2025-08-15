@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronDown } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 type Product = {
   name: string;
@@ -53,6 +54,129 @@ const pickupLocations: PickupLocation[] = [
     available: false,
   },
 ];
+
+// Custom Date Picker Component
+interface CustomDatePickerProps {
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  minDate?: string;
+}
+
+function CustomDatePicker({
+  value,
+  onChange,
+  required = false,
+  minDate,
+}: CustomDatePickerProps) {
+  const today = new Date();
+  const defaultMinDate = minDate || today.toISOString().split('T')[0];
+
+  return (
+    <div className='relative'>
+      <input
+        type='date'
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        min={defaultMinDate}
+        required={required}
+        className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 focus:border-brandTeal focus:outline-none transition-all text-gray-900 font-medium'
+        style={{
+          colorScheme: 'light',
+        }}
+      />
+    </div>
+  );
+}
+
+// Custom Time Picker Component
+interface CustomTimePickerProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+}
+
+function CustomTimePicker({
+  value,
+  onChange,
+  placeholder = 'Odaberite vrijeme',
+  required = false,
+}: CustomTimePickerProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Generate time options (9:00 - 20:00, every 30 minutes)
+  const timeOptions = [];
+  for (let hour = 9; hour <= 20; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      if (hour === 20 && minute > 0) break; // Stop at 20:00
+      const timeString = `${hour.toString().padStart(2, '0')}:${minute
+        .toString()
+        .padStart(2, '0')}`;
+      timeOptions.push({
+        value: timeString,
+        label: timeString,
+      });
+    }
+  }
+
+  const selectedTime = timeOptions.find((option) => option.value === value);
+
+  return (
+    <div className='relative'>
+      <button
+        type='button'
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 focus:border-brandTeal focus:outline-none transition-all flex items-center justify-between text-left ${
+          !selectedTime ? 'text-gray-500' : 'text-gray-900'
+        }`}
+      >
+        <span className='font-medium'>
+          {selectedTime ? selectedTime.label : placeholder}
+        </span>
+        <ChevronDown
+          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className='fixed inset-0 z-10'
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Dropdown */}
+          <div className='absolute top-full left-0 right-0 mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-60 overflow-y-auto'>
+            {timeOptions.map((option) => (
+              <button
+                key={option.value}
+                type='button'
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                  value === option.value
+                    ? 'bg-brandTeal text-white font-medium'
+                    : 'text-gray-900'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Hidden input for form validation */}
+      {required && <input type='hidden' value={value} required={required} />}
+    </div>
+  );
+}
 
 // Custom Select Component
 interface CustomSelectProps {
@@ -144,10 +268,10 @@ export default function OrderModal({
     phone: '',
     message: '',
     occasion: '',
-    date: '',
+    deliveryDate: '',
+    deliveryTime: '',
     people: '',
     pickupLocation: '',
-    pickupTime: '',
     productName: selectedProduct?.name || '',
     size: '',
     specialRequests: '',
@@ -156,6 +280,10 @@ export default function OrderModal({
   });
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+  const [showExplosion, setShowExplosion] = useState(false);
 
   // Update product name when selectedProduct changes
   useEffect(() => {
@@ -196,43 +324,129 @@ export default function OrderModal({
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    // Get selected pickup location details
-    const selectedLocation = pickupLocations.find(
-      (loc) => loc.id === formData.pickupLocation
-    );
+    console.log('🚀 Starting order submission...');
 
-    const customCakeNote = formData.customCakePreview
-      ? ' Naš tim će analizirati vašu prilagođenu sliku i kontaktirati vas s detaljima.'
-      : '';
+    try {
+      // Get selected pickup location details
+      const selectedLocation = pickupLocations.find(
+        (loc) => loc.id === formData.pickupLocation
+      );
 
-    alert(
-      `Hvala na narudžbi! Kontaktirat ćemo vas za ${
-        formData.productName || 'vašu narudžbu'
-      }. Preuzimanje: ${selectedLocation?.name || 'Nepoznato mjesto'} - ${
-        formData.date
-      } u ${formData.pickupTime}.${customCakeNote}`
-    );
-    onClose();
-    setCurrentStep(selectedProduct ? 2 : 1);
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      message: '',
-      occasion: '',
-      date: '',
-      people: '',
-      pickupLocation: '',
-      pickupTime: '',
-      productName: selectedProduct?.name || '',
-      size: '',
-      specialRequests: '',
-      customCakeImage: null,
-      customCakePreview: null,
-    });
+      // Find selected product for price
+      const selectedProductData = products.find(
+        (p) => p.name === formData.productName
+      );
+
+      // Prepare order data
+      const orderData = {
+        customerName: formData.name,
+        customerEmail: formData.email,
+        customerPhone: formData.phone,
+        deliveryDate: new Date(formData.deliveryDate),
+        deliveryTime: formData.deliveryTime,
+        deliveryAddress: selectedLocation?.address || '',
+        items: [
+          {
+            name: formData.productName,
+            quantity: 1,
+            price: selectedProductData
+              ? parseFloat(selectedProductData.price.replace('€', ''))
+              : 0,
+            notes: `Veličina: ${formData.size}${
+              formData.occasion ? `, Prigoda: ${formData.occasion}` : ''
+            }${
+              formData.specialRequests
+                ? `, Dodatne želje: ${formData.specialRequests}`
+                : ''
+            }${
+              formData.customCakePreview
+                ? ' (Prilagođena torta s učitanom slikom)'
+                : ''
+            }`,
+          },
+        ],
+        notes: `Lokacija preuzimanja: ${selectedLocation?.name || 'Nepoznato'}${
+          formData.customCakePreview
+            ? '\nPrilagođena torta - slika učitana'
+            : ''
+        }`,
+      };
+
+      console.log('📤 Sending order data:', orderData);
+
+      // Submit order to API
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      console.log('📥 Response status:', response.status);
+
+      const result = await response.json();
+      console.log('📋 Response data:', result);
+
+      if (result.success) {
+        console.log(
+          '✅ Order successful! Order number:',
+          result.order.orderNumber
+        );
+
+        // Set order number and show success modal
+        setOrderNumber(result.order.orderNumber);
+        console.log('🎯 Setting showSuccess to true...');
+        setShowSuccess(true);
+
+        // Trigger MASSIVE confetti celebration immediately
+        console.log('🎊 Triggering confetti celebration!');
+        setShowExplosion(true);
+
+        // Simple confetti celebration
+        const triggerConfetti = () => {
+          try {
+            console.log('🎉 Firing confetti burst!');
+
+            // Center burst with brand colors
+            confetti({
+              particleCount: 100,
+              spread: 60,
+              origin: { y: 0.6 },
+              colors: ['#7DCCBD', '#6BB8A8', '#5AA898'],
+            });
+          } catch (error) {
+            console.error('Confetti error:', error);
+          }
+        };
+
+        // Just 3 confetti bursts
+        setTimeout(triggerConfetti, 100);
+        setTimeout(triggerConfetti, 600);
+        setTimeout(triggerConfetti, 1100);
+
+        // DON'T close the modal - transform it to success state instead!
+        console.log('🎯 Modal transforming to success state - staying open!');
+
+        // DON'T reset anything - keep the form data for display in success screen
+      } else {
+        console.error('❌ Order failed:', result.error);
+        // Show error message
+        alert(`Greška pri slanju narudžbe: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('❌ Order submission error:', error);
+      alert(
+        'Dogodila se greška pri slanju narudžbe. Molimo pokušajte ponovno.'
+      );
+    } finally {
+      setIsSubmitting(false);
+      console.log('🏁 Order submission completed');
+    }
   };
 
   const handleChange = (
@@ -291,29 +505,42 @@ export default function OrderModal({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 z-50 overflow-y-auto'>
+    <div className='fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 lg:p-8'>
       {/* Backdrop */}
       <div
         className='fixed inset-0 bg-black/60 backdrop-blur-sm'
-        onClick={onClose}
+        onClick={(e) => {
+          // Don't close on backdrop click if showing success
+          if (!showSuccess) {
+            console.log('🚪 Backdrop clicked - closing modal');
+            onClose();
+          } else {
+            console.log('🛡️ Backdrop click blocked - success screen active');
+          }
+        }}
       />
 
       {/* Modal */}
-      <div className='flex min-h-full items-center justify-center p-4'>
-        <div className='relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto'>
+      <div className='relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col my-auto'>
+        {/* Scrollable Content */}
+        <div className='overflow-y-auto flex-1'>
           {/* Header */}
-          <div className='sticky top-0 z-10 bg-white border-b border-gray-100 rounded-t-3xl p-6'>
+          <div className='sticky top-0 z-10 bg-white border-b border-gray-100 rounded-t-3xl p-4 sm:p-6'>
             <div className='flex items-center justify-between'>
               <div>
-                <h2 className='text-2xl font-bold text-gray-900'>
-                  {currentStep === 1
+                <h2 className='text-xl sm:text-2xl font-bold text-gray-900'>
+                  {showSuccess
+                    ? '🎉 Narudžba završena!'
+                    : currentStep === 1
                     ? 'Odaberite slasticu'
                     : currentStep === 2
                     ? 'Detalji narudžbe'
                     : 'Pregled i potvrda'}
                 </h2>
-                <p className='text-warmGray'>
-                  {currentStep === 1
+                <p className='text-sm sm:text-base text-warmGray'>
+                  {showSuccess
+                    ? 'Vaša torta će biti spremna za preuzimanje'
+                    : currentStep === 1
                     ? 'Koju slasticu želite naručiti?'
                     : currentStep === 2
                     ? 'Ispunite podatke za narudžbu'
@@ -321,58 +548,192 @@ export default function OrderModal({
                 </p>
               </div>
               <button
-                onClick={onClose}
+                onClick={(e) => {
+                  // Don't close on X click if showing success
+                  if (!showSuccess) {
+                    console.log('❌ X button clicked - closing modal');
+                    onClose();
+                  } else {
+                    console.log(
+                      '🛡️ X button click blocked - success screen active'
+                    );
+                  }
+                }}
                 className='w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors'
               >
                 <span className='text-gray-700 font-bold text-lg'>✕</span>
               </button>
             </div>
 
-            {/* Progress */}
-            <div className='flex items-center gap-2 mt-4'>
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  currentStep >= 1
-                    ? 'bg-brandTeal text-white'
-                    : 'bg-gray-200 text-gray-500'
-                }`}
-              >
-                1
+            {/* Progress - Hide when showing success */}
+            {!showSuccess && (
+              <div className='flex items-center gap-2 mt-4'>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    currentStep >= 1
+                      ? 'bg-brandTeal text-white'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                >
+                  1
+                </div>
+                <div
+                  className={`flex-1 h-2 rounded-full ${
+                    currentStep >= 2 ? 'bg-brandTeal' : 'bg-gray-200'
+                  }`}
+                />
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    currentStep >= 2
+                      ? 'bg-brandTeal text-white'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                >
+                  2
+                </div>
+                <div
+                  className={`flex-1 h-2 rounded-full ${
+                    currentStep >= 3 ? 'bg-brandTeal' : 'bg-gray-200'
+                  }`}
+                />
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    currentStep >= 3
+                      ? 'bg-brandTeal text-white'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                >
+                  3
+                </div>
               </div>
-              <div
-                className={`flex-1 h-2 rounded-full ${
-                  currentStep >= 2 ? 'bg-brandTeal' : 'bg-gray-200'
-                }`}
-              />
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  currentStep >= 2
-                    ? 'bg-brandTeal text-white'
-                    : 'bg-gray-200 text-gray-500'
-                }`}
-              >
-                2
-              </div>
-              <div
-                className={`flex-1 h-2 rounded-full ${
-                  currentStep >= 3 ? 'bg-brandTeal' : 'bg-gray-200'
-                }`}
-              />
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  currentStep >= 3
-                    ? 'bg-brandTeal text-white'
-                    : 'bg-gray-200 text-gray-500'
-                }`}
-              >
-                3
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Content */}
           <div className='p-6'>
-            {currentStep === 1 ? (
+            {showSuccess ? (
+              // Success State: Clean & Simple
+              <div className='space-y-6 text-center'>
+                {/* Simple Success Message */}
+                <div className='bg-white rounded-2xl p-8 border-2 border-gray-100'>
+                  <div className='text-6xl mb-4'>🎉</div>
+                  <h3 className='text-2xl font-bold text-gray-900 mb-3'>
+                    Hvala vam!
+                  </h3>
+                  <p className='text-gray-700 mb-6'>
+                    Vaša narudžba je uspješno poslana
+                  </p>
+
+                  {/* Order Number */}
+                  <div className='bg-gray-50 rounded-xl p-4 mb-6'>
+                    <p className='text-sm text-gray-600 mb-1'>Broj narudžbe</p>
+                    <p
+                      className='text-2xl font-bold'
+                      style={{ color: '#7DCCBD' }}
+                    >
+                      {orderNumber}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Order Summary */}
+                <div className='bg-white rounded-2xl p-6 border-2 border-gray-100'>
+                  <h4 className='font-bold text-gray-900 mb-4 text-lg'>
+                    Detalji narudžbe
+                  </h4>
+
+                  <div className='space-y-3 text-sm'>
+                    <div className='flex justify-between'>
+                      <span className='text-gray-800'>Ime:</span>
+                      <span className='font-medium text-gray-900'>
+                        {formData.name}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span className='text-gray-800'>Torta:</span>
+                      <span className='font-medium text-gray-900'>
+                        {formData.productName}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span className='text-gray-800'>Veličina:</span>
+                      <span className='font-medium text-gray-900'>
+                        {formData.size}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span className='text-gray-800'>Datum:</span>
+                      <span className='font-medium text-gray-900'>
+                        {formData.deliveryDate}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span className='text-gray-800'>Vrijeme:</span>
+                      <span className='font-medium text-gray-900'>
+                        {formData.deliveryTime}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span className='text-gray-800'>Lokacija:</span>
+                      <span className='font-medium text-gray-900'>
+                        {
+                          pickupLocations.find(
+                            (loc) => loc.id === formData.pickupLocation
+                          )?.name
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className='bg-gray-100 rounded-xl p-4'>
+                  <div className='flex items-center justify-center gap-2 text-gray-800'>
+                    <div className='w-3 h-3 bg-gray-500 rounded-full animate-pulse'></div>
+                    <span className='font-bold'>NARUČENO</span>
+                  </div>
+                  <p className='text-gray-600 text-sm mt-2'>
+                    Kontaktirat ćemo vas uskoro za potvrdu
+                  </p>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => {
+                    setShowSuccess(false);
+                    setShowExplosion(false);
+                    setCurrentStep(selectedProduct ? 2 : 1);
+                    setFormData({
+                      name: '',
+                      email: '',
+                      phone: '',
+                      message: '',
+                      occasion: '',
+                      deliveryDate: '',
+                      deliveryTime: '',
+                      people: '',
+                      pickupLocation: '',
+                      productName: selectedProduct?.name || '',
+                      size: '',
+                      specialRequests: '',
+                      customCakeImage: null,
+                      customCakePreview: null,
+                    });
+                    onClose();
+                  }}
+                  className='w-full py-4 px-6 text-white font-bold rounded-xl transition-all duration-300 hover:shadow-lg transform hover:scale-105'
+                  style={{ backgroundColor: '#7DCCBD' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#6BB8A8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#7DCCBD';
+                  }}
+                >
+                  Zatvori
+                </button>
+              </div>
+            ) : currentStep === 1 ? (
               // Step 1: Product Selection
               <div className='space-y-8'>
                 {/* First row - Three existing cakes */}
@@ -654,7 +1015,7 @@ export default function OrderModal({
                   <h3 className='text-lg font-bold text-gray-900 mb-4 flex items-center gap-2'>
                     🎉 Detalji događaja
                   </h3>
-                  <div className='grid md:grid-cols-2 gap-4'>
+                  <div className='grid md:grid-cols-3 gap-4'>
                     <div>
                       <label className='block text-sm font-medium text-gray-700 mb-2'>
                         Prigoda
@@ -680,14 +1041,31 @@ export default function OrderModal({
                       <label className='block text-sm font-medium text-gray-700 mb-2'>
                         Željeni datum *
                       </label>
-                      <input
-                        type='date'
-                        name='date'
+                      <CustomDatePicker
+                        value={formData.deliveryDate}
+                        onChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            deliveryDate: value,
+                          }))
+                        }
                         required
-                        value={formData.date}
-                        onChange={handleChange}
-                        min={new Date().toISOString().split('T')[0]}
-                        className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brandTeal focus:border-brandTeal bg-white text-gray-900 font-medium transition-all duration-200'
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                        Željeno vrijeme *
+                      </label>
+                      <CustomTimePicker
+                        value={formData.deliveryTime}
+                        onChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            deliveryTime: value,
+                          }))
+                        }
+                        placeholder='Odaberite vrijeme'
+                        required
                       />
                     </div>
                   </div>
@@ -760,20 +1138,6 @@ export default function OrderModal({
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    <div>
-                      <label className='block text-sm font-medium text-gray-700 mb-2'>
-                        Vrijeme preuzimanja *
-                      </label>
-                      <input
-                        type='time'
-                        name='pickupTime'
-                        required
-                        value={formData.pickupTime}
-                        onChange={handleChange}
-                        className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brandTeal focus:border-brandTeal bg-white text-gray-900 font-medium transition-all duration-200'
-                      />
                     </div>
                   </div>
                 </div>
@@ -941,7 +1305,7 @@ export default function OrderModal({
                     <div>
                       <span className='text-gray-700 font-medium'>Datum:</span>
                       <p className='font-bold text-gray-900 mt-1'>
-                        {formData.date}
+                        {formData.deliveryDate}
                       </p>
                     </div>
                   </div>
@@ -974,7 +1338,7 @@ export default function OrderModal({
                             Vrijeme:
                           </span>
                           <p className='font-bold text-gray-900 mt-1'>
-                            {formData.date} u {formData.pickupTime}
+                            {formData.deliveryDate} u {formData.deliveryTime}
                           </p>
                         </div>
                         <div>
@@ -1028,16 +1392,32 @@ export default function OrderModal({
                   </button>
                   <button
                     onClick={handleSubmit}
-                    className='flex-1 py-3 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg'
-                    style={{ backgroundColor: '#7DCCBD' }}
+                    disabled={isSubmitting}
+                    className='flex-1 py-3 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+                    style={{
+                      backgroundColor: isSubmitting ? '#9CA3AF' : '#7DCCBD',
+                    }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#6BB8A8';
+                      if (!isSubmitting) {
+                        e.currentTarget.style.backgroundColor = '#6BB8A8';
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#7DCCBD';
+                      if (!isSubmitting) {
+                        e.currentTarget.style.backgroundColor = '#7DCCBD';
+                      }
                     }}
                   >
-                    🎂 Potvrdi narudžbu
+                    {isSubmitting ? (
+                      <>
+                        <span className='inline-block animate-spin mr-2'>
+                          ⏳
+                        </span>
+                        Šalje se...
+                      </>
+                    ) : (
+                      '🎂 Potvrdi narudžbu'
+                    )}
                   </button>
                 </div>
 

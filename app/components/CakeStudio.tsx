@@ -402,8 +402,107 @@ export default function CakeStudio() {
         </div>
 
         <div className='grid grid-cols-1 xl:grid-cols-5 gap-8'>
+          {/* Enhanced 3D Preview - Mobile First */}
+          <div className='xl:col-span-3 order-1 xl:order-2'>
+            <div className='bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl border border-gray-200 overflow-hidden h-[600px]'>
+              {isVisible ? (
+                <Canvas
+                  shadows
+                  camera={{ position: [3, 2, 3], fov: 45 }}
+                  gl={{
+                    antialias: true,
+                    alpha: true,
+                    powerPreference: 'high-performance',
+                    stencil: false,
+                    depth: true,
+                  }}
+                  dpr={[1, 1.5]} // Reduced max DPR for better performance
+                  frameloop='demand' // Only render when needed
+                  performance={{ min: 0.5 }} // Adaptive performance
+                >
+                  {/* Beautiful gradient background */}
+                  <color args={['#FFF8F0']} attach='background' />
+
+                  {/* Enhanced lighting for whiter cream visibility */}
+                  <ambientLight intensity={0.4} />
+                  <directionalLight
+                    position={[8, 12, 8]}
+                    intensity={0.8}
+                    castShadow
+                    shadow-mapSize={[1024, 1024]} // Reduced for better performance
+                    shadow-camera-far={20}
+                    shadow-camera-left={-8}
+                    shadow-camera-right={8}
+                    shadow-camera-top={8}
+                    shadow-camera-bottom={-8}
+                  />
+                  <pointLight
+                    position={[-6, 6, 2]}
+                    intensity={0.4}
+                    color='#FFFFFF'
+                  />
+
+                  {/* No environment to avoid any arch artifacts */}
+
+                  {/* Table and cake scene */}
+                  <WoodenTable />
+                  <RealisticCake options={options} />
+
+                  {/* Enhanced shadows */}
+                  <ContactShadows
+                    position={[0, -0.15, 0]}
+                    opacity={0.4}
+                    scale={15}
+                    blur={2.5}
+                    far={6}
+                    color='#8B4513'
+                  />
+
+                  {/* Improved camera controls with more zoom out */}
+                  <OrbitControls
+                    enablePan={false}
+                    enableZoom={true}
+                    enableRotate={true}
+                    minDistance={2}
+                    maxDistance={12}
+                    maxPolarAngle={Math.PI / 2}
+                    minPolarAngle={Math.PI / 8}
+                    enableDamping
+                    dampingFactor={0.05}
+                  />
+
+                  {/* Optimized post-processing - only in high-performance scenarios */}
+                  {typeof window !== 'undefined' &&
+                    window.innerWidth > 1024 && (
+                      <EffectComposer>
+                        <Bloom
+                          intensity={0.6}
+                          luminanceThreshold={0.9}
+                          luminanceSmoothing={0.3}
+                        />
+                        <N8AO intensity={1.0} />
+                      </EffectComposer>
+                    )}
+                </Canvas>
+              ) : (
+                <div className='w-full h-full flex items-center justify-center'>
+                  <div className='text-center space-y-4'>
+                    <div className='w-20 h-20 mx-auto bg-gray-200 rounded-full animate-pulse'></div>
+                    <p className='text-gray-500'>Priprema se 3D prikaz...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className='mt-6 text-center'>
+              <p className='text-sm text-gray-700'>
+                Rotiraj, zumiraj i razgledaj svoju tortu iz svih uglova
+              </p>
+            </div>
+          </div>
+
           {/* Modern Controls Panel */}
-          <div className='xl:col-span-2 space-y-8'>
+          <div className='xl:col-span-2 space-y-8 order-2 xl:order-1'>
             <div className='bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-lg border border-gray-200'>
               <h3
                 className='text-2xl font-bold mb-6'
@@ -561,105 +660,6 @@ export default function CakeStudio() {
                   Naruči svoju tortu
                 </button>
               </div>
-            </div>
-          </div>
-
-          {/* Enhanced 3D Preview */}
-          <div className='xl:col-span-3'>
-            <div className='bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl border border-gray-200 overflow-hidden h-[600px]'>
-              {isVisible ? (
-                <Canvas
-                  shadows
-                  camera={{ position: [3, 2, 3], fov: 45 }}
-                  gl={{
-                    antialias: true,
-                    alpha: true,
-                    powerPreference: 'high-performance',
-                    stencil: false,
-                    depth: true,
-                  }}
-                  dpr={[1, 1.5]} // Reduced max DPR for better performance
-                  frameloop='demand' // Only render when needed
-                  performance={{ min: 0.5 }} // Adaptive performance
-                >
-                  {/* Beautiful gradient background */}
-                  <color args={['#FFF8F0']} attach='background' />
-
-                  {/* Enhanced lighting for whiter cream visibility */}
-                  <ambientLight intensity={0.4} />
-                  <directionalLight
-                    position={[8, 12, 8]}
-                    intensity={0.8}
-                    castShadow
-                    shadow-mapSize={[1024, 1024]} // Reduced for better performance
-                    shadow-camera-far={20}
-                    shadow-camera-left={-8}
-                    shadow-camera-right={8}
-                    shadow-camera-top={8}
-                    shadow-camera-bottom={-8}
-                  />
-                  <pointLight
-                    position={[-6, 6, 2]}
-                    intensity={0.4}
-                    color='#FFFFFF'
-                  />
-
-                  {/* No environment to avoid any arch artifacts */}
-
-                  {/* Table and cake scene */}
-                  <WoodenTable />
-                  <RealisticCake options={options} />
-
-                  {/* Enhanced shadows */}
-                  <ContactShadows
-                    position={[0, -0.15, 0]}
-                    opacity={0.4}
-                    scale={15}
-                    blur={2.5}
-                    far={6}
-                    color='#8B4513'
-                  />
-
-                  {/* Improved camera controls with more zoom out */}
-                  <OrbitControls
-                    enablePan={false}
-                    enableZoom={true}
-                    enableRotate={true}
-                    minDistance={2}
-                    maxDistance={12}
-                    maxPolarAngle={Math.PI / 2}
-                    minPolarAngle={Math.PI / 8}
-                    enableDamping
-                    dampingFactor={0.05}
-                  />
-
-                  {/* Optimized post-processing - only in high-performance scenarios */}
-                  {typeof window !== 'undefined' &&
-                    window.innerWidth > 1024 && (
-                      <EffectComposer>
-                        <Bloom
-                          intensity={0.6}
-                          luminanceThreshold={0.9}
-                          luminanceSmoothing={0.3}
-                        />
-                        <N8AO intensity={1.0} />
-                      </EffectComposer>
-                    )}
-                </Canvas>
-              ) : (
-                <div className='w-full h-full flex items-center justify-center'>
-                  <div className='text-center space-y-4'>
-                    <div className='w-20 h-20 mx-auto bg-gray-200 rounded-full animate-pulse'></div>
-                    <p className='text-gray-500'>Priprema se 3D prikaz...</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className='mt-6 text-center'>
-              <p className='text-sm text-gray-700'>
-                Rotiraj, zumiraj i razgledaj svoju tortu iz svih uglova
-              </p>
             </div>
           </div>
         </div>

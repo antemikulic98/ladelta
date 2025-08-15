@@ -1,8 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fefefe;
+  --foreground: #1a1a1a;
 }
 
 @theme inline {
@@ -10,6 +10,27 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-playfair: var(--font-playfair);
+
+  /* Enhanced Brand colors */
+  --color-brandTeal: #0f766e;
+  --color-brandTeal-600: #0d9488;
+  --color-brandTeal-500: #14b8a6;
+  --color-brandTeal-400: #2dd4bf;
+  --color-brandTeal-50: #f0fdfa;
+  --color-brandTeal-100: #ccfbf1;
+
+  --color-brandGold: #d4af37;
+  --color-brandGold-600: #b8901e;
+  --color-brandGold-500: #eab308;
+  --color-brandGold-400: #facc15;
+  --color-brandGold-50: #fefce8;
+  --color-brandGold-100: #fef3c7;
+
+  /* Neutral colors */
+  --color-cream: #faf9f7;
+  --color-warmGray: #78716c;
+  --color-warmGray-100: #f5f5f4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +40,237 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  line-height: 1.6;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-brandGold) 30%, transparent);
+}
+
+/* Enhanced Utilities */
+.container-page {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .container-page {
+    padding-inline: 2rem;
+  }
+}
+
+/* Enhanced Gradients */
+.gold-gradient {
+  background: linear-gradient(135deg, #b8901e 0%, #d4af37 50%, #f1d27a 100%);
+}
+
+.teal-gradient {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%);
+}
+
+.hero-bg {
+  background: radial-gradient(
+      ellipse at top,
+      rgba(212, 175, 55, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(15, 118, 110, 0.1) 0%,
+      transparent 50%
+    );
+}
+
+/* Custom components */
+
+.product-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.7) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-brandTeal) 0%,
+    var(--color-brandTeal-600) 100%
+  );
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(15, 118, 110, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(15, 118, 110, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(
+    135deg,
+    var(--color-brandGold) 0%,
+    var(--color-brandGold-600) 100%
+  );
+  border: none;
+  color: #1a1a1a;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(212, 175, 55, 0.3);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(212, 175, 55, 0.4);
+}
+
+/* Typography */
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-brandTeal) 0%,
+    var(--color-brandGold) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Custom Font Classes */
+.font-display {
+  font-family: var(--font-playfair), serif;
+  font-weight: 700;
+}
+
+.text-hero {
+  font-family: var(--font-playfair), serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Swiper Styles */
+.cake-swiper .swiper-pagination-bullet {
+  background: #7dccbd !important;
+  opacity: 0.3;
+}
+
+.cake-swiper .swiper-pagination-bullet-active {
+  opacity: 1;
+  background: #7dccbd !important;
+}
+
+/* Mobile Menu Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+/* Enhanced animations for smooth sidebar */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

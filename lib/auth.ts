@@ -38,7 +38,20 @@ export async function createToken(
 export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as TokenPayload;
+    
+    // Validate that payload has the required properties
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'userId' in payload &&
+      'email' in payload &&
+      'role' in payload
+    ) {
+      return payload as TokenPayload;
+    }
+    
+    console.error('Invalid token payload structure');
+    return null;
   } catch (error) {
     console.error('Token verification failed:', error);
     return null;

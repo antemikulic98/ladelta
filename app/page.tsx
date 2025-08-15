@@ -1,6 +1,6 @@
 import Header from './components/Header';
 import Hero from './components/Hero';
-import CakeStudio from './components/CakeStudio';
+import { CakeStudioWithFallback } from './components/LazyComponents';
 
 export default function Home() {
   return (
@@ -8,7 +8,7 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <CakeStudio />
+        <CakeStudioWithFallback />
       </main>
     </div>
   );

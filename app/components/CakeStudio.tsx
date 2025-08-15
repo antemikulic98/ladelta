@@ -3,7 +3,7 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, ContactShadows } from '@react-three/drei';
 import { EffectComposer, Bloom, N8AO } from '@react-three/postprocessing';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 // Type definitions
@@ -338,31 +338,59 @@ export default function CakeStudio() {
     decoration: 'none',
   });
 
-  console.log('Available Three.js capabilities:', {
-    geometries: [
-      'CylinderGeometry',
-      'SphereGeometry',
-      'BoxGeometry',
-      'PlaneGeometry',
-    ],
-    materials: [
-      'MeshStandardMaterial',
-      'MeshPhysicalMaterial',
-      'MeshLambertMaterial',
-    ],
-    lights: ['DirectionalLight', 'PointLight', 'AmbientLight', 'SpotLight'],
-    drei_helpers: [
-      'OrbitControls',
-      'Environment',
-      'ContactShadows',
-      'Float',
-      'Text',
-    ],
-    postprocessing: ['Bloom', 'SSAO', 'DepthOfField', 'Noise', 'Vignette'],
-  });
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Intersection Observer to only render when visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Only render once when first visible
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Only log capabilities in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Available Three.js capabilities:', {
+      geometries: [
+        'CylinderGeometry',
+        'SphereGeometry',
+        'BoxGeometry',
+        'PlaneGeometry',
+      ],
+      materials: [
+        'MeshStandardMaterial',
+        'MeshPhysicalMaterial',
+        'MeshLambertMaterial',
+      ],
+      lights: ['DirectionalLight', 'PointLight', 'AmbientLight', 'SpotLight'],
+      drei_helpers: [
+        'OrbitControls',
+        'Environment',
+        'ContactShadows',
+        'Float',
+        'Text',
+      ],
+      postprocessing: ['Bloom', 'SSAO', 'DepthOfField', 'Noise', 'Vignette'],
+    });
+  }
 
   return (
-    <section className='w-full px-6 py-16 bg-gradient-to-br from-gray-50 via-white to-gray-50'>
+    <section
+      ref={sectionRef}
+      className='w-full px-6 py-16 bg-gradient-to-br from-gray-50 via-white to-gray-50'
+    >
       <div className='max-w-7xl mx-auto'>
         <div className='text-center mb-12'>
           <h2 className='text-4xl font-playfair font-bold text-gray-900 mb-4'>
@@ -539,82 +567,93 @@ export default function CakeStudio() {
           {/* Enhanced 3D Preview */}
           <div className='xl:col-span-3'>
             <div className='bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl border border-gray-200 overflow-hidden h-[600px]'>
-              <Canvas
-                shadows
-                camera={{ position: [3, 2, 3], fov: 45 }}
-                gl={{ antialias: true, alpha: true }}
-                dpr={[1, 2]}
-              >
-                {/* Beautiful gradient background */}
-                <color args={['#FFF8F0']} attach='background' />
+              {isVisible ? (
+                <Canvas
+                  shadows
+                  camera={{ position: [3, 2, 3], fov: 45 }}
+                  gl={{
+                    antialias: true,
+                    alpha: true,
+                    powerPreference: 'high-performance',
+                    stencil: false,
+                    depth: true,
+                  }}
+                  dpr={[1, 1.5]} // Reduced max DPR for better performance
+                  frameloop='demand' // Only render when needed
+                  performance={{ min: 0.5 }} // Adaptive performance
+                >
+                  {/* Beautiful gradient background */}
+                  <color args={['#FFF8F0']} attach='background' />
 
-                {/* Enhanced lighting for whiter cream visibility */}
-                <ambientLight intensity={0.4} />
-                <directionalLight
-                  position={[8, 12, 8]}
-                  intensity={0.8}
-                  castShadow
-                  shadow-mapSize={[2048, 2048]}
-                  shadow-camera-far={20}
-                  shadow-camera-left={-8}
-                  shadow-camera-right={8}
-                  shadow-camera-top={8}
-                  shadow-camera-bottom={-8}
-                />
-                <pointLight
-                  position={[-6, 6, 2]}
-                  intensity={0.4}
-                  color='#FFFFFF'
-                />
-
-                {/* No environment to avoid any arch artifacts */}
-
-                {/* Table and cake scene */}
-                <WoodenTable />
-                <RealisticCake options={options} />
-
-                {/* Enhanced shadows */}
-                <ContactShadows
-                  position={[0, -0.15, 0]}
-                  opacity={0.4}
-                  scale={15}
-                  blur={2.5}
-                  far={6}
-                  color='#8B4513'
-                />
-
-                {/* Improved camera controls with more zoom out */}
-                <OrbitControls
-                  enablePan={false}
-                  enableZoom={true}
-                  enableRotate={true}
-                  minDistance={2}
-                  maxDistance={12}
-                  maxPolarAngle={Math.PI / 2}
-                  minPolarAngle={Math.PI / 8}
-                  enableDamping
-                  dampingFactor={0.05}
-                />
-
-                {/* Post-processing for premium look */}
-                <EffectComposer>
-                  {/* N8AO is a more modern and stable alternative to SSAO */}
-                  <N8AO
-                    aoRadius={0.5}
-                    intensity={4}
-                    aoSamples={6}
-                    denoiseSamples={4}
-                    denoiseRadius={12}
-                    distanceFalloff={1}
-                    screenSpaceRadius
+                  {/* Enhanced lighting for whiter cream visibility */}
+                  <ambientLight intensity={0.4} />
+                  <directionalLight
+                    position={[8, 12, 8]}
+                    intensity={0.8}
+                    castShadow
+                    shadow-mapSize={[1024, 1024]} // Reduced for better performance
+                    shadow-camera-far={20}
+                    shadow-camera-left={-8}
+                    shadow-camera-right={8}
+                    shadow-camera-top={8}
+                    shadow-camera-bottom={-8}
                   />
-                  <Bloom
-                    intensity={0.3}
-                    luminanceThreshold={0.9}
-                    luminanceSmoothing={0.3}
+                  <pointLight
+                    position={[-6, 6, 2]}
+                    intensity={0.4}
+                    color='#FFFFFF'
                   />
-                </EffectComposer>
-              </Canvas>
+
+                  {/* No environment to avoid any arch artifacts */}
+
+                  {/* Table and cake scene */}
+                  <WoodenTable />
+                  <RealisticCake options={options} />
+
+                  {/* Enhanced shadows */}
+                  <ContactShadows
+                    position={[0, -0.15, 0]}
+                    opacity={0.4}
+                    scale={15}
+                    blur={2.5}
+                    far={6}
+                    color='#8B4513'
+                  />
+
+                  {/* Improved camera controls with more zoom out */}
+                  <OrbitControls
+                    enablePan={false}
+                    enableZoom={true}
+                    enableRotate={true}
+                    minDistance={2}
+                    maxDistance={12}
+                    maxPolarAngle={Math.PI / 2}
+                    minPolarAngle={Math.PI / 8}
+                    enableDamping
+                    dampingFactor={0.05}
+                  />
+
+                  {/* Optimized post-processing - only in high-performance scenarios */}
+                  {typeof window !== 'undefined' &&
+                    window.innerWidth > 1024 && (
+                      <EffectComposer>
+                        <Bloom
+                          intensity={0.6}
+                          luminanceThreshold={0.9}
+                          luminanceSmoothing={0.3}
+                        />
+                        <N8AO intensity={1.0} />
+                      </EffectComposer>
+                    )}
+                </Canvas>
+              ) : (
+                <div className='w-full h-full flex items-center justify-center'>
+                  <div className='text-center space-y-4'>
+                    <div className='w-20 h-20 mx-auto bg-gray-200 rounded-full animate-pulse'></div>
+                    <p className='text-gray-500'>Priprema se 3D prikaz...</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className='mt-6 text-center'>
